@@ -1,0 +1,2 @@
+packer=1.6.6
+vagrant=2.2.14
