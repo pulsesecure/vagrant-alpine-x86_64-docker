@@ -1,0 +1,72 @@
+{
+  "builders": [
+    {
+      "boot_command": [
+        "root<enter>",
+        "<wait>",
+        "ifconfig eth0 up && udhcpc -q -n -i eth0<enter>",
+        "<wait>",
+        "wget -O - http://{{ .HTTPIP }}:{{ .HTTPPort }}/init.sh | /bin/sh<enter>"
+      ],
+      "boot_wait": "30s",
+      "communicator": "ssh",
+      "disk_size": 51200,
+      "guest_additions_mode": "disable",
+      "guest_os_type": "Linux26_64",
+      "hard_drive_interface": "sata",
+      "headless": false,
+      "http_directory": "http",
+      "iso_checksum": "sha256:17df5aaf6fad99e57767b51f6934ebb799b7e72e8bed8a5f1d4a0639899b7e9b",
+      "iso_url": "http://dl-cdn.alpinelinux.org/alpine/v3.12/releases/x86_64/alpine-standard-3.12.1-x86_64.iso",
+      "shutdown_command": "sudo /sbin/poweroff",
+      "ssh_password": "vagrant",
+      "ssh_username": "vagrant",
+      "ssh_wait_timeout": "5m",
+      "type": "virtualbox-iso",
+      "vboxmanage": [
+        ["modifyvm", "{{.Name}}", "--memory", "512"],
+        ["modifyvm", "{{.Name}}", "--cpus", "1"]
+      ],
+      "virtualbox_version_file": ".vbox_version"
+    }
+  ],
+  "description": "Alpine Linux 3.3 x86_64 With Docker",
+  "post-processors": [
+    [
+      {
+        "type": "vagrant",
+	"keep_input_artifact": false,
+        "output": "pulsesecure/alpine-3.12.1x86_64-docker.box"
+      },
+      {
+        "type": "vagrant-cloud",
+        "box_tag": "pulsesecure/alpine-3.12.1-x86_64-docker",
+        "access_token": "{{user `ATLAS_TOKEN`}}",
+        "version": "2"
+      }
+    ]
+    
+  ],
+  "provisioners": [
+    {
+      "override": {
+        "virtualbox-iso": {
+          "execute_command": "sudo -S /bin/sh '{{ .Path }}'"
+        }
+      },
+      "scripts": [
+        "scripts/upgrade.sh",
+        "scripts/setup.sh",
+        "scripts/vagrant-ssh.sh",
+        "scripts/chrony.sh",
+        "scripts/docker.sh",
+        "scripts/shrink.sh"
+      ],
+      "type": "shell"
+    }
+  ],
+  "push": {
+    "name": "pulsesecure/alpine-3.12.1-x86_64-docker",
+    "vcs": true
+  }
+}
