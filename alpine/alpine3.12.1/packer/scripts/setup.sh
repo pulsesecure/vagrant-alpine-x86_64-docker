@@ -4,6 +4,9 @@ set -ux
 apk add openssl ca-certificates
 update-ca-certificates
 
+# Add git tar coreutils and make
+apk add git tar coreutils make
+
 # Needed for setup scripts
 PREFIX=
 
